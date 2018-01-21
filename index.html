@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <title>Amazing News</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+    <style type="text/css">
+      #mainContainer {
+          padding: 20px;
+      }
+
+      .tweet {
+          border: 1px solid grey;
+          border-radius: 5px;
+          padding: 5px;
+          margin: 5px;
+      }
+
+      #search {
+          width: 100px;
+          margin-right: 10px;
+      }
+
+      #toggleLogin {
+          cursor: pointer;
+      }
+
+      .comment {
+        float: right;
+      }
+
+      /* Sticky footer styles
+      -------------------------------------------------- */
+      html {
+        position: relative;
+        min-height: 100%;
+      }
+      body {
+        /* Margin bottom by footer height */
+        margin-bottom: 60px;
+      }
+      .footer {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        /* Set the fixed height of the footer here */
+        height: 60px;
+        line-height: 60px; /* Vertically center the text there */
+        background-color: #f5f5f5;
+      }
+    </style>
+      
+  </head>
+  <body>
+    <nav class="navbar navbar-toggleable-md navbar-light bg-faded">
+          <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <a class="navbar-brand">Amazing News</a>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto"></ul>
+            <div class="form-inline my-2 my-lg-0" id = "lgAndSu">
+              <button type="button" class="btn btn-outline-success my-2 my-sm-0" data-toggle="modal" data-target="#myModal">Login/Signup</button>
+            </div>
+          </div>
+    </nav>
+
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="loginModalTitle">Login</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div>
+                <input type="hidden" id="loginActive" value="1">
+                  <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" class="form-control" id="email" placeholder="Email Address">
+                  </div>
+                  <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control" id="password" placeholder="Password">
+                  </div>
+             </div>
+          </div>
+          <div class="modal-footer">
+              <a id="toggleLogin">Sign up</a>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" id="loginSignupButton" onclick="clicked()">Login</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="hehe" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Comment</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true" onclick="commentClose()">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body" id="commentShow">
+
+          </div>
+          <div class="modal-footer">
+            <form class="form-inline">
+              <div class="form-group mx-lg-5 mb-2">
+                <input type="text" class="form-control" id="commentArea" placeholder="...">
+              </div>
+              <input type="hidden" id="commentTarget" value="">
+              <button type="button" class="btn btn-primary mb-2" onclick="addComment(this)" id="addCommentButton">Add Comments</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="container" id="mainContainer">
+      <div class="row">
+        <div class="col-md-8">
+	        <h2> Recent News </h2>
+	        <div id = "news">
+	        </div>      
+        </div>
+        
+        <div class="col-md-4">
+            <button class="btn btn-primary" onclick="orderByAlphabet()">A-Z&darr;</button>  
+            <button class="btn btn-primary" onclick="orderByTime()">Time&uarr;</button>     
+            <hr>
+            
+          <div class="form">
+            <div class="form-group">
+            <textarea type="text" class="form-control" id="urlContent"></textarea>
+            </div>
+            <button class="btn btn-primary" id="postUrl" onclick="postUrl()">Post URL</button>
+          </div>   
+
+        </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+        <p>&copy; Zhihuang 2018</p>
+    </div>
+  </footer>
+
+
+  <script src="https://www.gstatic.com/firebasejs/4.8.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/4.8.2/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/4.8.2/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/4.8.2/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/4.8.2/firebase-messaging.js"></script>
+  <script>
+    // Initialize Firebase
+    var config = {
+      apiKey: "AIzaSyC2SLnii6tREtHE2ezhx_BakVZ9JMmCfQc",
+      authDomain: "news-305b8.firebaseapp.com",
+      databaseURL: "https://news-305b8.firebaseio.com",
+      projectId: "news-305b8",
+      storageBucket: "news-305b8.appspot.com",
+      messagingSenderId: "1038055279330"
+    };
+    firebase.initializeApp(config);
+    var database = firebase.database();
+
+    // This function is the callback function of the comment listener, used to detach;
+    var commentFunction;
+    var commentPath;
+
+    //logout when window is closed
+    window.addEventListener('beforeunload', function(event) {
+      logout();
+    }, false);
+
+    function logout() {
+      firebase.auth().signOut().then(function() {
+        // Sign-out successful.
+        document.getElementById("news").innerHTML = "";
+      }).catch(function(error) {
+        // An error happened.
+      });
+    }
+
+    //log in or sign up button clicked
+    function clicked() {
+      if (document.getElementById("loginActive").value == "1") {
+        login(); 
+      } else {
+        signup();
+      }
+    }
+
+    function login() {
+      var email = document.getElementById("email").value;
+      var password = document.getElementById("password").value;
+      var thisUser = firebase.auth().signInAndRetrieveDataWithEmailAndPassword(email, password);
+      thisUser.catch(function(error) {
+            // Handle Errors here.
+            var errorCode = error.code;
+            var errorMessage = error.message;
+            // [START_EXCLUDE]
+            if (errorCode === 'auth/wrong-password') {
+              alert('Wrong password.');
+            } else {
+              alert(errorMessage);
+            }
+            console.log(error);
+      });
+      thisUser.then(function(myuser) {
+        alert("Log in Successfully!");
+      });
+    }
+
+    function signup() {
+      var email = document.getElementById("email").value;
+      var password = document.getElementById("password").value;
+      var newUser = firebase.auth().createUserAndRetrieveDataWithEmailAndPassword(email, password);
+      newUser.catch(function(error) {
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        if (errorCode === 'auth/email-already-in-use') {
+              alert('Email already in use.');
+            } else {
+              alert(errorMessage);
+            }
+            console.log(error);
+      });
+      newUser.then(function(myuser) {
+        alert("Sign Up Successfully");
+      });
+    }
+
+    firebase.auth().onAuthStateChanged(function(user) {
+      if (user) {
+        // User is signed in.
+        var displayName = user.displayName;
+        var email = user.email;
+        var emailVerified = user.emailVerified;
+        var photoURL = user.photoURL;
+        var isAnonymous = user.isAnonymous;
+        var uid = user.uid;
+        var providerData = user.providerData;
+        var newsRef = database.ref('news');
+
+        //read the news
+        newsRef.on('child_added', function(childSnapshot, prevChildKey) {
+          document.getElementById("news").innerHTML = "<div class='tweet'><p>" + 
+          childSnapshot.val().url + "</p><p id = '" + childSnapshot.key + "_Upvote'>" + childSnapshot.val().upvote + "</p>" +
+          '<button id="' + childSnapshot.key + '" class="btn btn-primary" onclick="addOne(this)">Upvote</button>'
+          + '<button id="' + childSnapshot.key + 'Comment" class="btn btn-outline-success my-2 my-sm-0 comment" data-toggle="modal" data-target="#hehe" onclick="getComment(this)">Comment</button>'
+           + "</div>" + document.getElementById("news").innerHTML;
+
+          var voteRef = database.ref('news/' + childSnapshot.key + '/upvote');
+          voteRef.on('value', function(dataSnapshot) {
+            document.getElementById(childSnapshot.key + "_Upvote").innerHTML = dataSnapshot.val();
+          });
+        });
+
+        //change to logout
+        document.getElementById("lgAndSu").innerHTML = '<button type="button" class="btn btn-outline-success my-2 my-sm-0" data-toggle="modal" onclick="logout()">LogOut</button>';
+      } else {
+        document.getElementById("lgAndSu").innerHTML = '<button type="button" class="btn btn-outline-success my-2 my-sm-0" data-toggle="modal" data-target="#myModal">Login/Signup</button>';
+      }
+    });
+
+    // read the data from textarea and post it, if the news is already in the database, otherwise upvote
+    function postUrl() {
+      var user = firebase.auth().currentUser; 
+      if (user) {
+	      var text = document.getElementById("urlContent").value;
+	      if (text == "") {
+	      	alert("You can not post empty url");
+	      } else {
+	        var postRef = firebase.database().ref('news');
+	        postRef.orderByChild("url").equalTo(text).once("value").then(function(snapshot) {
+	        	if (snapshot.val() === null) {
+	        		var newPostRef = postRef.push();
+			        newPostRef.transaction(function(currentData) {
+			            return { url: text, timestamp: new Date().getTime(), upvote: 0 };
+			        });
+	        	} else {
+	        		for (key in snapshot.val()) {
+	        			var oldPostRef = firebase.database().ref('news/' + key);
+	        			addOneUpvote(oldPostRef);
+	        		}
+            }
+          });
+	      }
+  		}
+    }
+
+    //add a upvote to the corresponding news
+    function addOneUpvote(urlRef) {
+      var user = firebase.auth().currentUser; 
+      if (user) {
+        var userUpvoteRef = firebase.database().ref('users/' + user.uid + '/' + urlRef.key);
+        var userRef = firebase.database().ref('users/' + user.uid);
+        userUpvoteRef.once('value').then(function(snapshot) {
+          if (!snapshot.val()) {
+            var updates = {};
+            updates[urlRef.key] = true;
+            userRef.update(updates);
+            
+            var upvoteRef = urlRef.child("upvote");
+            upvoteRef.transaction(function(currentUpvote) {
+              return currentUpvote + 1;
+            });
+          } else {
+            alert("you can't upvote a url twice");
+          }
+        });
+      }
+    }
+
+    //if user click 'upvote', then upvote the news.
+    function addOne(element) {
+      var upvoteRef = database.ref("news/" + element.id);
+      addOneUpvote(upvoteRef);
+    }
+
+    function orderByTime() {
+    	var user = firebase.auth().currentUser; 
+    	if (user) {
+    		var topNewsRef = firebase.database().ref('news').orderByKey();
+    		topNewsRef.once('value').then(function(dataSnapshot) {
+    			document.getElementById("news").innerHTML = "";
+    			dataSnapshot.forEach(function(childSnapshot) {
+    				document.getElementById("news").innerHTML = "<div class='tweet'><p>" + 
+		            childSnapshot.val().url + "</p><p id = '" + childSnapshot.key + "_Upvote'>" + childSnapshot.val().upvote + "</p>" +
+		          '<button id="' + childSnapshot.key + '" class="btn btn-primary" onclick="addOne(this)">Upvote</button>' + '<button id="' + childSnapshot.key + 'Comment" class="btn btn-outline-success my-2 my-sm-0 comment" data-toggle="modal" data-target="#hehe" onclick="getComment(this)">Comment</button>' +"</div>" + document.getElementById("news").innerHTML;
+		            var voteRef = database.ref('news/' + childSnapshot.key + '/upvote');
+		            voteRef.on('value', function(dataSnapshot) {
+		              document.getElementById(childSnapshot.key + "_Upvote").innerHTML = dataSnapshot.val();
+		            });
+				});
+			});
+    	}
+    }
+
+    function orderByAlphabet() {
+    	var user = firebase.auth().currentUser; 
+    	if (user) {
+    		var topNewsRef = firebase.database().ref('news').orderByChild('url');
+    		topNewsRef.once('value').then(function(dataSnapshot) {
+    			document.getElementById("news").innerHTML = "";
+    			dataSnapshot.forEach(function(childSnapshot) {
+    				document.getElementById("news").innerHTML += "<div class='tweet'><p>" + 
+		            childSnapshot.val().url + "</p><p id = '" + childSnapshot.key + "_Upvote'>" + childSnapshot.val().upvote + "</p>" +
+		          '<button id="' + childSnapshot.key + '" class="btn btn-primary" onclick="addOne(this)">Upvote</button>' + '<button id="' + childSnapshot.key + 'Comment" class="btn btn-outline-success my-2 my-sm-0 comment" data-toggle="modal" data-target="#hehe" onclick="getComment(this)">Comment</button>' +"</div>";
+		            var voteRef = database.ref('news/' + childSnapshot.key + '/upvote');
+		            voteRef.on('value', function(dataSnapshot) {
+		              document.getElementById(childSnapshot.key + "_Upvote").innerHTML = dataSnapshot.val();
+		            });
+				});
+			});
+    	}
+    }
+
+    function getComment(element) {
+      var user = firebase.auth().currentUser;
+      if (user) {
+        var path = 'comments/' + element.id.substr(0, element.id.length - 7);
+        commentPath = path;
+        document.getElementById('commentTarget').value = path;
+        document.getElementById('commentShow').innerHTML = "";
+        var commentRef = firebase.database().ref(path);
+        commentRef.once('value').then(function(dataSnapshot) {
+          if (dataSnapshot.val() === null) {
+            document.getElementById('commentShow').innerHTML = "There is no comment";
+          }
+        });
+        commentFunction = commentRef.on('child_added', function(childSnapshot, prevChildKey) {
+          if (document.getElementById('commentShow').innerHTML == "There is no comment") {
+            document.getElementById('commentShow').innerHTML = "";
+          }
+          document.getElementById('commentShow').innerHTML += "<p>" + childSnapshot.val().userEmail + ":   " + childSnapshot.val().comment + "</p>";
+        });
+      }
+    }
+
+    //add this user's comment to the corresponding news(which is a faded text value whose id is commentTarget
+    function addComment() {
+      var user = firebase.auth().currentUser;
+      if (user) {
+        var path = document.getElementById('commentTarget').value;
+        var text = document.getElementById('commentArea').value;
+        if (text == "") {
+          alert("You can not post empty comment");
+        } else {
+          var newCommentRef = firebase.database().ref(path).push();
+          newCommentRef.set({
+            'userEmail' : user.email,
+            'comment' : text
+          });
+
+          //clear the textArea
+          document.getElementById('commentArea').value = "";
+        }
+      } 
+    }
+
+    //detach the listener for comment
+    function commentClose() {
+    	commentRef = firebase.database().ref(commentPath);
+    	commentRef.off('child_added', commentFunction);
+    }
+
+
+  </script>
+<!-- jQuery first, then Tether, then Bootstrap JS. -->
+    <script   src="http://code.jquery.com/jquery-3.2.1.js"   integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE="   crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      $("#toggleLogin").click(function() {
+          if ($("#loginActive").val() == "1") {
+              $("#loginActive").val("0");
+              $("#loginModalTitle").html("Sign up");
+              $("#loginSignupButton").html("Sign up");
+              $("#toggleLogin").html("Login");
+          } else { 
+              $("#loginActive").val("1");
+              $("#loginModalTitle").html("Login");
+              $("#loginSignupButton").html("Login");
+              $("#toggleLogin").html("Sign Up");
+          }
+      });
+    </script>
+  </body>
+</html>
